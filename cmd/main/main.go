@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/kangaroux/webview/api"
@@ -9,26 +11,44 @@ import (
 )
 
 func main() {
+	addrChan := make(chan string)
+
 	go func() {
 		router := api.NewRouter()
 
-		if err := http.ListenAndServe(":8000", router); err != nil {
+		listener, err := net.Listen("tcp", "127.0.0.1:0")
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println("API listening on", listener.Addr().String())
+		addrChan <- listener.Addr().String()
+
+		if err := http.Serve(listener, router); err != nil {
 			log.Fatal(err)
 		}
 	}()
 
 	debug := true
+	addr := <-addrChan
 	w := webview.New(debug)
 	defer w.Destroy()
 	w.SetTitle("Minimal webview example")
 	w.SetSize(800, 600, webview.HintNone)
-	w.Navigate(`data:text/html,
+	w.Navigate(fmt.Sprintf(`data:text/html,
 <html>
 	<head>
-		<link type="text/css" rel="stylesheet" href="http://localhost:8000/static/style.css">
-		<script src="http://localhost:8000/static/app.js"></script>
+		<link rel="stylesheet" href="http://%[1]s/static/style.css">
 	</head>
+	<body>
+		<div id="root"></div>
+		<script type="text/javascript">
+			window.API_HOST = "http://%[1]s";
+		</script>
+		<script src="http://%[1]s/static/app.js"></script>
+	</body>
 </html>
-	`)
+	`, addr))
 	w.Run()
 }
