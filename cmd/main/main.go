@@ -1,15 +1,49 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/kangaroux/webview/api"
 	"github.com/webview/webview"
 )
+
+var htmlTemplate = ""
+
+const (
+	htmlTemplatePath = "static/index.template.html"
+)
+
+func init() {
+	data, err := ioutil.ReadFile(htmlTemplatePath)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	htmlTemplate = string(data)
+}
+
+func buildFromTemplate(templateString string, data interface{}) string {
+	tpl, err := template.New("index").Parse(templateString)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	out := &strings.Builder{}
+
+	if err := tpl.Execute(out, data); err != nil {
+		log.Fatal(err)
+	}
+
+	return out.String()
+}
 
 func main() {
 	addrChan := make(chan string)
@@ -37,21 +71,9 @@ func main() {
 	defer w.Destroy()
 	w.SetTitle("Minimal webview example")
 	w.SetSize(800, 600, webview.HintNone)
-	data := fmt.Sprintf(`
-	<html>
-		<head>
-			<link rel="stylesheet" href="http://%[1]s/static/style.css">
-		</head>
-		<body>
-			<div id="root"></div>
-			<script type="text/javascript">
-				var API_HOST = "%[1]s";
-				var API_URL = "http://" + API_HOST;
-			</script>
-			<script src="http://%[1]s/static/app.js"></script>
-		</body>
-	</html>
-		`, addr)
-	w.Navigate("data:text/html," + url.QueryEscape(data))
+
+	html := buildFromTemplate(htmlTemplate, struct{ Host string }{addr})
+
+	w.Navigate("data:text/html," + url.QueryEscape(html))
 	w.Run()
 }
