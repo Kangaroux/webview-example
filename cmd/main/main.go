@@ -12,7 +12,7 @@ func main() {
 	go func() {
 		server := server.Server{}
 
-		http.HandleFunc("/public/", server.GetAssets)
+		http.HandleFunc("/static/", server.StaticAssets)
 
 		if err := http.ListenAndServe(":8000", nil); err != nil {
 			log.Fatal(err)
