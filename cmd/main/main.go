@@ -4,17 +4,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kangaroux/webview/server"
+	"github.com/kangaroux/webview/api"
 	"github.com/webview/webview"
 )
 
 func main() {
 	go func() {
-		server := server.Server{}
+		router := api.NewRouter()
 
-		http.HandleFunc("/static/", server.StaticAssets)
-
-		if err := http.ListenAndServe(":8000", nil); err != nil {
+		if err := http.ListenAndServe(":8000", router); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -27,8 +25,8 @@ func main() {
 	w.Navigate(`data:text/html,
 <html>
 	<head>
-		<link type="text/css" rel="stylesheet" href="http://localhost:8000/public/style.css">
-		<script src="http://localhost:8000/public/app.js"></script>
+		<link type="text/css" rel="stylesheet" href="http://localhost:8000/static/style.css">
+		<script src="http://localhost:8000/static/app.js"></script>
 	</head>
 </html>
 	`)
