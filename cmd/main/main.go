@@ -19,6 +19,7 @@ const (
 	htmlTemplatePath = "static/index.template.html"
 )
 
+// Read the HTML template into memory
 func init() {
 	data, err := ioutil.ReadFile(htmlTemplatePath)
 
@@ -29,7 +30,8 @@ func init() {
 	htmlTemplate = string(data)
 }
 
-func buildFromTemplate(templateString string, data interface{}) string {
+// A wrapper for rendering a template using the provided context
+func renderTemplate(templateString string, data interface{}) string {
 	tpl, err := template.New("index").Parse(templateString)
 
 	if err != nil {
@@ -48,9 +50,11 @@ func buildFromTemplate(templateString string, data interface{}) string {
 func main() {
 	addrChan := make(chan string)
 
+	// Start the HTTP server
 	go func() {
 		router := api.NewRouter()
 
+		// Let the OS pick an open port
 		listener, err := net.Listen("tcp", "127.0.0.1:0")
 
 		if err != nil {
@@ -58,6 +62,9 @@ func main() {
 		}
 
 		log.Println("API listening on", listener.Addr().String())
+
+		// http.Serve blocks, so send the address we're listening on back to
+		// the main thread so we can use it for the webview
 		addrChan <- listener.Addr().String()
 
 		if err := http.Serve(listener, router); err != nil {
@@ -67,12 +74,15 @@ func main() {
 
 	debug := true
 	addr := <-addrChan
+
 	w := webview.New(debug)
 	defer w.Destroy()
-	w.SetTitle("Minimal webview example")
+
+	w.SetTitle("Webview Example")
 	w.SetSize(800, 600, webview.HintNone)
 
-	html := buildFromTemplate(htmlTemplate, struct{ Host string }{addr})
+	// Inject the server address and render the full template
+	html := renderTemplate(htmlTemplate, struct{ Host string }{addr})
 
 	w.Navigate("data:text/html," + url.QueryEscape(html))
 	w.Run()
