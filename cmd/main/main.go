@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/kangaroux/webview/api"
+	"github.com/kangaroux/webview-example/api"
 	"github.com/webview/webview"
 )
 

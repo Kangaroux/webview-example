@@ -1,4 +1,4 @@
-module github.com/kangaroux/webview
+module github.com/kangaroux/webview-example
 
 go 1.16
 
