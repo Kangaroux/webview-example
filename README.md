@@ -22,8 +22,13 @@ Once installed, you can run the app as you would normally
 go run cmd/main/main.go
 ```
 
-Note: The `*-dev` packages are only needed for compiling. Once you have an executable, the only packages
-you need are `libgtk-3` and `libwebkit2gtk-4.0`.
+## Publish Notes
+
+On linux, the `*-dev` packages are only needed for compiling. On Ubuntu for example, the only packages
+you need for running the executable are `libgtk-3` and `libwebkit2gtk-4.0`.
+
+Make sure that `debug == false` in `cmd/main/main.go` when building the app for publishing. Leaving this
+on will allow users to access the developer tools.
 
 ## Quick Walkthrough
 

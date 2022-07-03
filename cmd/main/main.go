@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/kangaroux/webview-example/api"
@@ -84,6 +83,6 @@ func main() {
 	// Inject the server address and render the full template
 	html := renderTemplate(htmlTemplate, struct{ Host string }{addr})
 
-	w.Navigate("data:text/html," + url.QueryEscape(html))
+	w.Navigate("data:text/html," + html)
 	w.Run()
 }
