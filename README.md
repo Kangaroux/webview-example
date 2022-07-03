@@ -10,7 +10,7 @@ This example uses a HTTP server to serve static content and handle API requests.
 
 The [webview](https://github.com/webview/webview) repo has some getting started info of its own. TL;DR: depending on your OS/distro, webview will use whatever web library it can find.
 
-For Ubuntu, I had to install these:
+To compile on Ubuntu you will need to install these packages:
 
 ```
 sudo apt install -y libgtk-3-dev libwebkit2gtk-4.0-dev
@@ -21,6 +21,9 @@ Once installed, you can run the app as you would normally
 ```
 go run cmd/main/main.go
 ```
+
+Note: The `*-dev` packages are only needed for compiling. Once you have an executable, the only packages
+you need are `libgtk-3` and `libwebkit2gtk-4.0`.
 
 ## Quick Walkthrough
 
