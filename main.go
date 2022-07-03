@@ -9,6 +9,9 @@ import (
 	"github.com/webview/webview"
 )
 
+// Having this as a string lets us configure it with the `-ldflags` option when building.
+var debug = "true"
+
 // Starts the API server and returns the host name it's listening on.
 func startServer() string {
 	addr := make(chan string)
@@ -35,9 +38,9 @@ func startServer() string {
 }
 
 func main() {
-	debug := true
 	host := startServer()
-	w := webview.New(debug)
+
+	w := webview.New(debug == "true")
 	defer w.Destroy()
 
 	w.SetTitle("Webview Example")

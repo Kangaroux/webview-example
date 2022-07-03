@@ -4,42 +4,49 @@ This repo contains an example/starter for building a [webview](https://github.co
 
 Webview is a cross-platform library for creating desktop web applications (similar to Electron).
 
-This example uses a HTTP server to serve static content and handle API requests. Because the server is running locally on the machine, you have full access to the network, file system, etc.
+This repo compiles to a 6.7MB executable on Pop!OS 22.04.
 
-## Getting Started
+## Quickstart
 
-The [webview](https://github.com/webview/webview) repo has some getting started info of its own. TL;DR: depending on your OS/distro, webview will use whatever web library it can find.
+### Prerequisites
 
-To compile on Ubuntu you will need to install these packages:
+Check the [webview](https://github.com/webview/webview#prerequisites) docs for what dependencies you'll need.
 
+### How it Works
+
+This example uses a HTTP server for serving the content. The server listens on a random available port
+so there is no concern for conflicts.
+
+Static files and HTML can be found in `server/`. These files are embedded into the app using the
+[embed](https://pkg.go.dev/embed) package.
+
+It's not included in this example, but you could implement a REST API or use websockets to handle the
+communication between the UI and the server. The `webview` library also provides `Eval()` and `Bind()`
+functions for calling JS and Go code respectively. I have not done any benchmarking, but I imagine that
+any difference between these choices is negligible.
+
+### Running the App
+
+```bash
+go run .
 ```
-sudo apt install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+
+The window first appears as a blank white page while the browser engine is initializing. There isn't
+a way to avoid this with the current webview version, however there is an [open feature request](https://github.com/webview/webview/issues/495)
+to support this.
+
+### Developer Tools
+
+Developer tools can be enabled/disabled by passing a bool to `webview.New()`. You can access the devtools
+via right click > `Inspect Element`.
+
+You can disable the devtools when building (or running) the app by passing `-ldflags "-X main.debug=false"`.
+For example:
+
+```bash
+# Build to ./app and disable devtools
+go build -ldflags "-X main.debug=false" -o app .
 ```
 
-Once installed, you can run the app as you would normally
-
-```
-go run cmd/main/main.go
-```
-
-## Publish Notes
-
-On linux, the `*-dev` packages are only needed for compiling. On Ubuntu for example, the only packages
-you need for running the executable are `libgtk-3` and `libwebkit2gtk-4.0`.
-
-Make sure that `debug == false` in `cmd/main/main.go` when building the app for publishing. Leaving this
-on will allow users to access the developer tools.
-
-## Quick Walkthrough
-
-The first thing the app does is start a HTTP server. It opens a listener on the address `127.0.0.1:0` which tells the OS to pick a random open port.
-
-For the webview side, a simple window is first created. The URL can be a data string so we just pass it the HTML directly. It doesn't have to be a data string, we could just as easily navigate to a URL on the server that displays the page.
-
-In order for the frontend to know the host, the address of the HTTP server is injected into the HTML using the [html/template](https://pkg.go.dev/html/template) package.
-
-At this point we have a fully functional web page being rendered. From here you could build out something like a React app and do any background work using the HTTP server.
-
-## Caching
-
-By default (at least for WebKit), caching seems to be enabled for the webview. The static file handler adds a `Cache-Control: no-cache` header which solves this issue for the static files. Caching the static files isn't necessary since we are serving them from the local machine.
+There doesn't seem to be any performance hit to leaving devtools on, but probably worth disabling if you
+don't want users snooping around your app.
